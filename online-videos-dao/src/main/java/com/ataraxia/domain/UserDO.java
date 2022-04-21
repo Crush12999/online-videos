@@ -1,5 +1,6 @@
 package com.ataraxia.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.util.Date;
@@ -25,6 +26,9 @@ public class UserDO {
     private Date createTime;
 
     private Date updateTime;
+
+    @TableField(exist = false)
+    private UserInfoDO userInfo;
 
     public Long getId() {
         return id;
@@ -80,6 +84,14 @@ public class UserDO {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public UserInfoDO getUserInfo() {
+        return userInfo;
+    }
+
+    public void setUserInfo(UserInfoDO userInfo) {
+        this.userInfo = userInfo;
     }
 
     @Override

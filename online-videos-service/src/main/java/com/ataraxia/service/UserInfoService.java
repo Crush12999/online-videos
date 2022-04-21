@@ -9,4 +9,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @description 用户基本信息
  */
 public interface UserInfoService extends IService<UserInfoDO> {
+    /**
+     * 更新用户信息
+     * @param userInfo
+     */
+    void updateUserInfos(UserInfoDO userInfo);
 }

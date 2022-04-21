@@ -1,14 +1,14 @@
 package com.ataraxia.controller;
 
+import com.ataraxia.controller.support.UserSupport;
 import com.ataraxia.domain.ResponseResult;
 import com.ataraxia.domain.UserDO;
+import com.ataraxia.domain.UserInfoDO;
+import com.ataraxia.service.UserInfoService;
 import com.ataraxia.service.UserService;
 import com.ataraxia.util.RSAUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Ataraxia
@@ -21,6 +21,12 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserInfoService userInfoService;
+
+    @Autowired
+    private UserSupport userSupport;
+
     /**
      * 获取RSA公钥
      * @return RSA公钥字符串
@@ -28,7 +34,14 @@ public class UserController {
     @GetMapping("/rsa-pks")
     public ResponseResult<String> getRsaPublicKey() {
         String publicKey = RSAUtil.getPublicKeyStr();
-        return ResponseResult.success(publicKey);
+        return new ResponseResult<>(publicKey);
+    }
+
+    @GetMapping("/users")
+    public ResponseResult<UserDO> getUserInfo() {
+        Long userId = userSupport.getCurrentUserId();
+        UserDO user = userService.getUserInfo(userId);
+        return new ResponseResult<>(user);
     }
 
     /**
@@ -42,5 +55,31 @@ public class UserController {
         return ResponseResult.success();
     }
 
+    /**
+     * 登录
+     * @param user
+     * @return token令牌
+     */
+    @PostMapping("/user-tokens")
+    public ResponseResult<String> login(@RequestBody UserDO user) throws Exception {
+        String token = userService.login(user);
+        return ResponseResult.success(token);
+    }
+
+    @PutMapping("/users")
+    public ResponseResult<String> updateUser(@RequestBody UserDO user) throws Exception {
+        Long userId = userSupport.getCurrentUserId();
+        user.setId(userId);
+        userService.updateUser(user);
+        return ResponseResult.success();
+    }
+
+    @PutMapping("/user-infos")
+    public ResponseResult<String> updateUserInfos(@RequestBody UserInfoDO userInfo) {
+        Long userId = userSupport.getCurrentUserId();
+        userInfo.setUserId(userId);
+        userInfoService.updateUserInfos(userInfo);
+        return ResponseResult.success();
+    }
 
 }

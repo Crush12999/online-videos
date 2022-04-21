@@ -26,10 +26,10 @@ public class CommonGlobalExceptionHandler {
     public ResponseResult<String> commonExceptionHandler(HttpServletRequest request, Exception e) {
         String errorMessage = e.getMessage();
         if (e instanceof ConditionException) {
-            Integer errorCode = ((ConditionException) e).getCode();
+            String errorCode = ((ConditionException) e).getCode();
             return new ResponseResult<>(errorCode, errorMessage);
         } else {
-            return new ResponseResult<>(500, errorMessage);
+            return new ResponseResult<>("500", errorMessage);
         }
     }
 }

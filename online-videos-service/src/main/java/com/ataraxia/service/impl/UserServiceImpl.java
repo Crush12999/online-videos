@@ -6,9 +6,11 @@ import com.ataraxia.domain.constant.UserConstant;
 import com.ataraxia.domain.exception.ConditionException;
 import com.ataraxia.mapper.UserInfoMapper;
 import com.ataraxia.mapper.UserMapper;
+import com.ataraxia.service.UserInfoService;
 import com.ataraxia.service.UserService;
 import com.ataraxia.util.MD5Util;
 import com.ataraxia.util.RSAUtil;
+import com.ataraxia.util.TokenUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mysql.cj.util.StringUtils;
@@ -23,11 +25,14 @@ import java.util.Objects;
  * @create 2022/4/21 10:31
  * @description 用户业务处理接口实现
  */
-@Service("UserService")
+@Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
 
     @Autowired
-    private UserInfoMapper userInfoMapper;
+    private UserInfoService userInfoService;
+
+    @Autowired
+    private TokenUtil tokenUtil;
 
     /**
      * 创建用户
@@ -66,11 +71,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         UserInfoDO userInfo = new UserInfoDO();
         // 插入成功后可以得到用户ID
         userInfo.setUserId(user.getId());
-        userInfo.setNickname(UserConstant.DEFAULT_NICKNAME);
+        userInfo.setNick(UserConstant.DEFAULT_NICKNAME);
         userInfo.setBirth(UserConstant.DEFAULT_BIRTH);
         userInfo.setGender(UserConstant.GENDER_MALE);
         userInfo.setCreateTime(now);
-        userInfoMapper.insert(userInfo);
+        userInfoService.save(userInfo);
 
     }
 
@@ -85,6 +90,51 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         LambdaQueryWrapper<UserDO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UserDO::getPhone, phone);
         return baseMapper.selectOne(wrapper);
+    }
+
+    @Override
+    public String login(UserDO user) throws Exception {
+        String phone = user.getPhone();
+        if (StringUtils.isNullOrEmpty(phone)) {
+            throw  new ConditionException("手机号不能为空！");
+        }
+        UserDO dbUser = this.getUserByPhone(phone);
+        if (Objects.isNull(dbUser)) {
+            throw new ConditionException("当前用户不存在！");
+        }
+        String password = user.getPassword();
+        String rawPassword;
+        try {
+            rawPassword = RSAUtil.decrypt(password);
+        } catch (Exception e) {
+            throw new ConditionException("密码解密失败！");
+        }
+        String salt = dbUser.getSalt();
+        String md5Password = MD5Util.sign(rawPassword, salt, "UTF-8");
+        if (!md5Password.equals(dbUser.getPassword())) {
+            throw new ConditionException("密码错误！");
+        }
+        TokenUtil tokenUtil = new TokenUtil();
+
+        return tokenUtil.generateToken(dbUser.getId());
+    }
+
+    @Override
+    public UserDO getUserInfo(Long userId) {
+        UserDO user = baseMapper.selectById(userId);
+
+        LambdaQueryWrapper<UserInfoDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserInfoDO::getUserId, userId);
+        UserInfoDO userInfo = userInfoService.getOne(wrapper);
+
+        user.setUserInfo(userInfo);
+        return user;
+    }
+
+    @Override
+    public void updateUser(UserDO user) {
+        user.setUpdateTime(new Date());
+        baseMapper.updateById(user);
     }
 
 

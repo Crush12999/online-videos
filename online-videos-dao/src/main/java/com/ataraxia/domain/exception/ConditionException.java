@@ -9,23 +9,23 @@ public class ConditionException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    private int code;
+    private String code;
 
-    public ConditionException(Integer code, String name) {
+    public ConditionException(String code, String name) {
         super(name);
         this.code = code;
     }
 
     public ConditionException(String name) {
         super(name);
-        this.code = 500;
+        this.code = "500";
     }
 
-    public int getCode() {
+    public String getCode() {
         return code;
     }
 
-    public void setCode(int code) {
+    public void setCode(String code) {
         this.code = code;
     }
 }

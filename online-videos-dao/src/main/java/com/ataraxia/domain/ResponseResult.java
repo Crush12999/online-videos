@@ -7,21 +7,21 @@ package com.ataraxia.domain;
  */
 public class ResponseResult<T> {
 
-    private final static int SUCCESS_CODE = 0;
+    private final static String SUCCESS_CODE = "0";
     
     private final static String SUCCESS_MESSAGE = "成功";
 
-    private final static int FAILED_CODE = 1;
+    private final static String FAILED_CODE = "1";
 
     private final static String FAILED_MESSAGE = "失败";
 
-    private int code;
+    private String code;
 
     private String msg;
 
     private T data;
 
-    public ResponseResult(Integer code, String msg) {
+    public ResponseResult(String code, String msg) {
         this.code = code;
         this.msg = msg;
     }
@@ -44,15 +44,15 @@ public class ResponseResult<T> {
         return new ResponseResult<>(FAILED_CODE, FAILED_MESSAGE);
     }
 
-    public static ResponseResult<String> fail(Integer code, String msg) {
+    public static ResponseResult<String> fail(String code, String msg) {
         return new ResponseResult<>(code, msg);
     }
 
-    public Integer getCode() {
+    public String getCode() {
         return code;
     }
 
-    public void setCode(int code) {
+    public void setCode(String code) {
         this.code = code;
     }
 

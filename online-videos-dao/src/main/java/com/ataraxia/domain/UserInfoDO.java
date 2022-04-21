@@ -17,7 +17,7 @@ public class UserInfoDO {
 
     private Long userId;
 
-    private String nickname;
+    private String nick;
 
     private String avatar;
 
@@ -47,12 +47,12 @@ public class UserInfoDO {
         this.userId = userId;
     }
 
-    public String getNickname() {
-        return nickname;
+    public String getNick() {
+        return nick;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+    public void setNick(String nick) {
+        this.nick = nick;
     }
 
     public String getAvatar() {
@@ -108,7 +108,7 @@ public class UserInfoDO {
         return "UserInfoDO{" +
                 "id=" + id +
                 ", userId=" + userId +
-                ", nickname='" + nickname + '\'' +
+                ", nick='" + nick + '\'' +
                 ", avatar='" + avatar + '\'' +
                 ", sign='" + sign + '\'' +
                 ", gender='" + gender + '\'' +
