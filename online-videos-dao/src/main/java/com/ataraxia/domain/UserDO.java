@@ -1,6 +1,8 @@
 package com.ataraxia.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.util.Date;
@@ -13,6 +15,7 @@ import java.util.Date;
 @TableName("t_user")
 public class UserDO {
 
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private String phone;

@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 用户关注分组表
@@ -45,6 +46,12 @@ public class FollowingGroupDO implements Serializable {
      * 更新时间
      */
     private Date updateTime;
+
+    /**
+     * 存放关注者信息
+     */
+    @TableField(exist = false)
+    private List<UserInfoDO> followingUserInfoList;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
@@ -131,6 +138,14 @@ public class FollowingGroupDO implements Serializable {
      */
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public List<UserInfoDO> getFollowingUserInfoList() {
+        return followingUserInfoList;
+    }
+
+    public void setFollowingUserInfoList(List<UserInfoDO> followingUserInfoList) {
+        this.followingUserInfoList = followingUserInfoList;
     }
 
     @Override

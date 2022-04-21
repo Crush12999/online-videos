@@ -31,4 +31,17 @@ public class UserConstant {
      * 默认昵称
      */
     public static final String DEFAULT_NICKNAME = "萌新";
+
+    /**
+     * 默认分组 type值为 2
+     */
+    public static final String USER_FOLLOWING_GROUP_TYPE_DEFAULT = "2";
+
+    /**
+     * 用户自定义分组 type值为 3
+     */
+    public static final String USER_FOLLOWING_GROUP_TYPE_USER = "3";
+
+
+    public static final String USER_FOLLOWING_GROUP_ALL_NAME = "全部关注";
 }

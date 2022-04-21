@@ -1,5 +1,8 @@
 package com.ataraxia.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.util.Date;
@@ -13,6 +16,7 @@ import java.util.Date;
 @TableName("t_user_info")
 public class UserInfoDO {
 
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long userId;
@@ -30,6 +34,12 @@ public class UserInfoDO {
     private Date createTime;
 
     private Date updateTime;
+
+    /**
+     * 是否关注过，true代表 已关注
+     */
+    @TableField(exist = false)
+    private Boolean followed;
 
     public Long getId() {
         return id;
@@ -101,6 +111,14 @@ public class UserInfoDO {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Boolean getFollowed() {
+        return followed;
+    }
+
+    public void setFollowed(Boolean followed) {
+        this.followed = followed;
     }
 
     @Override

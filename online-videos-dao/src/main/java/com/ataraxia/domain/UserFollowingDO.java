@@ -46,6 +46,12 @@ public class UserFollowingDO implements Serializable {
      */
     private Date updateTime;
 
+    /**
+     * 关注的用户信息
+     */
+    @TableField(exist = false)
+    private UserInfoDO userInfo;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
@@ -131,6 +137,14 @@ public class UserFollowingDO implements Serializable {
      */
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public UserInfoDO getUserInfo() {
+        return userInfo;
+    }
+
+    public void setUserInfo(UserInfoDO userInfo) {
+        this.userInfo = userInfo;
     }
 
     @Override

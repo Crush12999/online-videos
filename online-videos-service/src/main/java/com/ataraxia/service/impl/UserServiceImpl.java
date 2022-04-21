@@ -1,5 +1,7 @@
 package com.ataraxia.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.ataraxia.domain.PageResult;
 import com.ataraxia.domain.UserDO;
 import com.ataraxia.domain.UserInfoDO;
 import com.ataraxia.domain.constant.UserConstant;
@@ -12,13 +14,17 @@ import com.ataraxia.util.MD5Util;
 import com.ataraxia.util.RSAUtil;
 import com.ataraxia.util.TokenUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mysql.cj.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author Ataraxia
@@ -135,6 +141,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     public void updateUser(UserDO user) {
         user.setUpdateTime(new Date());
         baseMapper.updateById(user);
+    }
+
+    /**
+     * 分页查询用户信息
+     * @param params 分页查询参数
+     * @return 分页查询结果
+     */
+    @Override
+    public PageResult<UserInfoDO> getPageListUserInfos(JSONObject params) {
+        Integer no = params.getInteger("no");
+        Integer size = params.getInteger("size");
+        Long userId = params.getLong("userId");
+        String nick = params.getString("nick");
+        Page<UserInfoDO> page = new Page<>(no, size);
+
+        LambdaQueryWrapper<UserInfoDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserInfoDO::getUserId, userId);
+        wrapper.like(UserInfoDO::getNick, nick);
+        wrapper.orderByDesc(UserInfoDO::getId);
+
+        IPage<UserInfoDO> userInfoPage = userInfoService.page(page, wrapper);
+        return new PageResult<>(userInfoPage.getTotal(), userInfoPage.getRecords());
     }
 
 

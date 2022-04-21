@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Ataraxia
@@ -27,5 +29,15 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfoDO>
         LambdaQueryWrapper<UserInfoDO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UserInfoDO::getUserId, userInfo.getUserId());
         baseMapper.update(userInfo, wrapper);
+    }
+
+    /**
+     * 通过id集合查询对应用户信息
+     * @param followingIdSet
+     * @return
+     */
+    @Override
+    public List<UserInfoDO> getUserInfoByUserIds(Set<Long> followingIdSet) {
+        return baseMapper.selectBatchIds(followingIdSet);
     }
 }
