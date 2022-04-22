@@ -5,6 +5,18 @@ spring:
     url: jdbc:mysql://localhost:3306/online-videos
     username: root
     password: 123456
+  # redis
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
 
 server:
   port: 9090
+
+# rocketmq
+rocketmq:
+  name:
+    server:
+      address: 127.0.0.1:9876
+
