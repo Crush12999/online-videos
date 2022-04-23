@@ -3,6 +3,9 @@ package com.ataraxia.controller;
 import com.ataraxia.controller.support.UserSupport;
 import com.ataraxia.domain.ResponseResult;
 import com.ataraxia.domain.UserMomentDO;
+import com.ataraxia.domain.annotation.ApiLimitedRole;
+import com.ataraxia.domain.annotation.DataLimited;
+import com.ataraxia.domain.constant.AuthRoleConstant;
 import com.ataraxia.service.UserMomentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -35,6 +38,8 @@ public class UserMomentController {
      * @return 结果
      * @throws Exception MQ处理异常
      */
+    @ApiLimitedRole(limitedRoleCodeList = {AuthRoleConstant.ROLE_LV0})
+    @DataLimited
     @PostMapping("/user-moments")
     @ApiOperation(value = "用户发布动态")
     public ResponseResult<String> insertUserMoments(@RequestBody UserMomentDO userMoment) throws Exception {

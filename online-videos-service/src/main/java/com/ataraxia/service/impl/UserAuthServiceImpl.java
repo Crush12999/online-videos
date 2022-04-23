@@ -1,15 +1,18 @@
 package com.ataraxia.service.impl;
 
 import com.ataraxia.domain.UserAuthDTO;
+import com.ataraxia.domain.auth.AuthRoleDO;
 import com.ataraxia.domain.auth.AuthRoleElementOperationDO;
 import com.ataraxia.domain.auth.AuthRoleMenuDO;
 import com.ataraxia.domain.auth.UserRoleDO;
+import com.ataraxia.domain.constant.AuthRoleConstant;
 import com.ataraxia.service.AuthRoleService;
 import com.ataraxia.service.UserAuthService;
 import com.ataraxia.service.UserRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,6 +55,20 @@ public class UserAuthServiceImpl implements UserAuthService {
         userAuthDTO.setRoleMenuList(authRoleMenuList);
 
         return userAuthDTO;
+    }
+
+    /**
+     * 给用户添加默认角色
+     * @param userId 用户ID
+     */
+    @Override
+    public void insertUserDefaultRole(Long userId) {
+        UserRoleDO userRole = new UserRoleDO();
+        AuthRoleDO authRole = authRoleService.getRoleByCode(AuthRoleConstant.ROLE_LV0);
+        userRole.setUserId(userId);
+        userRole.setRoleId(authRole.getId());
+        userRole.setCreateTime(new Date());
+        userRoleService.save(userRole);
     }
 
 }

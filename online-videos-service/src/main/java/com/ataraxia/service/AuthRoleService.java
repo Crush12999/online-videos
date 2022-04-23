@@ -28,4 +28,11 @@ public interface AuthRoleService extends IService<AuthRoleDO> {
      * @return 相关菜单权限列表
      */
     List<AuthRoleMenuDO> listAuthRoleMenusByRoleIds(Set<Long> roleIdSet);
+
+    /**
+     * 通过 code 获取角色
+     * @param roleCodeLv 角色等级
+     * @return 对应角色
+     */
+    AuthRoleDO getRoleByCode(String roleCodeLv);
 }

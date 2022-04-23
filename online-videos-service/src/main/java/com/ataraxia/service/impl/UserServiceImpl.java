@@ -8,6 +8,7 @@ import com.ataraxia.domain.constant.UserConstant;
 import com.ataraxia.domain.exception.ConditionException;
 import com.ataraxia.mapper.UserInfoMapper;
 import com.ataraxia.mapper.UserMapper;
+import com.ataraxia.service.UserAuthService;
 import com.ataraxia.service.UserInfoService;
 import com.ataraxia.service.UserService;
 import com.ataraxia.util.MD5Util;
@@ -36,6 +37,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Autowired
     private UserInfoService userInfoService;
+
+    @Autowired
+    private UserAuthService userAuthService;
 
     @Autowired
     private TokenUtil tokenUtil;
@@ -83,6 +87,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         userInfo.setCreateTime(now);
         userInfoService.save(userInfo);
 
+        // 添加用户默认角色
+        userAuthService.insertUserDefaultRole(user.getId());
     }
 
     /**
