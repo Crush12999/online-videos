@@ -31,7 +31,7 @@ public interface FollowingGroupService extends IService<FollowingGroupDO> {
      * @param userId
      * @return
      */
-    List<FollowingGroupDO> getByUserId(Long userId);
+    List<FollowingGroupDO> listByUserId(Long userId);
 
     /**
      * 添加关注分组
@@ -45,5 +45,5 @@ public interface FollowingGroupService extends IService<FollowingGroupDO> {
      * @param userId 用户ID
      * @return 分组列表
      */
-    List<FollowingGroupDO> getUserFollowingGroups(Long userId);
+    List<FollowingGroupDO> listUserFollowingGroups(Long userId);
 }

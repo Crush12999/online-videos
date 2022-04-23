@@ -23,5 +23,5 @@ public interface UserInfoService extends IService<UserInfoDO> {
      * @param followingIdSet
      * @return
      */
-    List<UserInfoDO> getUserInfoByUserIds(Set<Long> followingIdSet);
+    List<UserInfoDO> listUserInfoByUserIds(Set<Long> followingIdSet);
 }

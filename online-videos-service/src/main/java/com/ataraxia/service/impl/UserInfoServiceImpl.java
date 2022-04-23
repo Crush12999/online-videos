@@ -37,7 +37,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfoDO>
      * @return
      */
     @Override
-    public List<UserInfoDO> getUserInfoByUserIds(Set<Long> followingIdSet) {
+    public List<UserInfoDO> listUserInfoByUserIds(Set<Long> followingIdSet) {
         return baseMapper.selectBatchIds(followingIdSet);
     }
 }

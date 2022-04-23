@@ -25,14 +25,14 @@ public interface UserFollowingService extends IService<UserFollowingDO> {
      * @param userId 用户ID
      * @return 关注列表
      */
-    List<FollowingGroupDO> getUserFollowings(Long userId);
+    List<FollowingGroupDO> listUserFollowings(Long userId);
 
     /**
      * 获取用户粉丝列表
      * @param userId 用户ID
      * @return 粉丝列表
      */
-    List<UserFollowingDO> getUserFans(Long userId);
+    List<UserFollowingDO> listUserFans(Long userId);
 
     /**
      * 校验列表中是否存在关注用户
@@ -40,5 +40,5 @@ public interface UserFollowingService extends IService<UserFollowingDO> {
      * @param userId 登录用户ID
      * @return 校验过的用户信息列表
      */
-    List<UserInfoDO> checkFollowingStatus(List<UserInfoDO> list, Long userId);
+    List<UserInfoDO> listCheckFollowingStatus(List<UserInfoDO> list, Long userId);
 }

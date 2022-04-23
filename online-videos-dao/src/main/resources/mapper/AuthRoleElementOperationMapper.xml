@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ataraxia.mapper.auth.AuthRoleElementOperationMapper">
+
+    <resultMap id="AuthElementOperationResultMap" type="com.ataraxia.domain.auth.AuthRoleElementOperationDO">
+        <id property="id" column="id"/>
+        <result property="roleId" column="role_id"/>
+        <result property="elementOperationId" column="element_operation_id"/>
+        <association property="authElementOperation" javaType="com.ataraxia.domain.auth.AuthElementOperationDO">
+            <id column="element_name" property="elementName"/>
+            <id column="element_code" property="elementCode"/>
+            <id column="operation_type" property="operationType"/>
+        </association>
+    </resultMap>
+
+    <select id="listRoleElementOperationsByRoleIds"
+            parameterType="java.util.Set"
+            resultMap="AuthElementOperationResultMap">
+        select areo.*,
+               aeo.element_name,
+               aeo.element_code,
+               aeo.operation_type
+        from t_auth_role_element_operation areo
+                 left join t_auth_element_operation aeo on areo.element_operation_id = aeo.id
+
+        where areo.role_id in
+            <foreach collection="roleIdSet" item="roleId" index="index" open="(" close=")" separator=", ">
+                #{roleId}
+            </foreach>
+
+    </select>
+
+</mapper>

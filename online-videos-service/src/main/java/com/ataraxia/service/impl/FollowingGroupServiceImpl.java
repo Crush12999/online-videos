@@ -42,7 +42,7 @@ public class FollowingGroupServiceImpl extends ServiceImpl<FollowingGroupMapper,
     }
 
     @Override
-    public List<FollowingGroupDO> getByUserId(Long userId) {
+    public List<FollowingGroupDO> listByUserId(Long userId) {
         LambdaQueryWrapper<FollowingGroupDO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(FollowingGroupDO::getUserId, userId).or().in(FollowingGroupDO::getType, "0", "1", "2");
         return baseMapper.selectList(wrapper);
@@ -67,7 +67,7 @@ public class FollowingGroupServiceImpl extends ServiceImpl<FollowingGroupMapper,
      * @return 分组列表
      */
     @Override
-    public List<FollowingGroupDO> getUserFollowingGroups(Long userId) {
+    public List<FollowingGroupDO> listUserFollowingGroups(Long userId) {
         LambdaQueryWrapper<FollowingGroupDO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(FollowingGroupDO::getUserId, userId);
         return baseMapper.selectList(wrapper);

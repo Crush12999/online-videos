@@ -79,7 +79,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
      * @return
      */
     @Override
-    public List<FollowingGroupDO> getUserFollowings(Long userId) {
+    public List<FollowingGroupDO> listUserFollowings(Long userId) {
         LambdaQueryWrapper<UserFollowingDO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UserFollowingDO::getUserId, userId);
         List<UserFollowingDO> userFollowingList = baseMapper.selectList(wrapper);
@@ -89,7 +89,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
         List<UserInfoDO> userInfoList = new ArrayList<>();
         if (followingIdSet.size() > 0) {
             // 查对应所有参数的信息
-            userInfoList = userInfoService.getUserInfoByUserIds(followingIdSet);
+            userInfoList = userInfoService.listUserInfoByUserIds(followingIdSet);
         }
 
         for (UserFollowingDO userFollowing : userFollowingList) {
@@ -101,7 +101,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
         }
 
         // 分组
-        List<FollowingGroupDO> groupList = followingGroupService.getByUserId(userId);
+        List<FollowingGroupDO> groupList = followingGroupService.listByUserId(userId);
 
         // 全部分组
         FollowingGroupDO allGroup = new FollowingGroupDO();
@@ -134,7 +134,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
      * @return 粉丝列表
      */
     @Override
-    public List<UserFollowingDO> getUserFans(Long userId) {
+    public List<UserFollowingDO> listUserFans(Long userId) {
         LambdaQueryWrapper<UserFollowingDO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UserFollowingDO::getFollowingId, userId);
         List<UserFollowingDO> fanList = baseMapper.selectList(wrapper);
@@ -144,7 +144,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
         List<UserInfoDO> userInfoList = new ArrayList<>();
 
         if (fanIdSet.size() > 0) {
-            userInfoList = userInfoService.getUserInfoByUserIds(fanIdSet);
+            userInfoList = userInfoService.listUserInfoByUserIds(fanIdSet);
         }
 
         // 判断当前粉丝列表有没有登录用户关注过的
@@ -178,7 +178,7 @@ public class UserFollowingServiceImpl extends ServiceImpl<UserFollowingMapper, U
      * @return 校验过的用户信息列表
      */
     @Override
-    public List<UserInfoDO> checkFollowingStatus(List<UserInfoDO> userInfoList, Long userId) {
+    public List<UserInfoDO> listCheckFollowingStatus(List<UserInfoDO> userInfoList, Long userId) {
         // 获取用户关注列表
         LambdaQueryWrapper<UserFollowingDO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UserFollowingDO::getUserId, userId);

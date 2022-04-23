@@ -1,6 +1,12 @@
 package com.ataraxia.config;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.ataraxia.domain.UserFollowingDO;
+import com.ataraxia.domain.UserMomentDO;
 import com.ataraxia.domain.constant.UserMomentsConstant;
+import com.ataraxia.service.UserFollowingService;
+import com.mysql.cj.util.StringUtils;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
@@ -15,7 +21,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Ataraxia
@@ -30,6 +38,10 @@ public class RocketMqConfig {
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+
+    @Autowired
+    private UserFollowingService userFollowingService;
+
 
     /**
      * 创建生产者实例
@@ -68,9 +80,34 @@ public class RocketMqConfig {
              */
             @Override
             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgList, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
-                for (MessageExt msg : msgList) {
-                    System.out.println(msg);
+                MessageExt msg = msgList.get(0);
+                if (Objects.isNull(msg)) {
+                    return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                 }
+                // 获取实体类字符串
+                String bodyStr = new String(msg.getBody());
+                // 获取创建动态的时候的实体类
+                UserMomentDO userMoment = JSONObject.toJavaObject(JSONObject.parseObject(bodyStr), UserMomentDO.class);
+                // 为了方便查找所有跟这个用户相关的，订阅了这个用户的所有订阅者
+                Long userId = userMoment.getUserId();
+                // 查找粉丝
+                List<UserFollowingDO> fanList = userFollowingService.listUserFans(userId);
+                // 给每个粉丝发送新发布的动态
+                for (UserFollowingDO fan : fanList) {
+                    // 把动态放到redis里，订阅用户再从缓存中获取
+                    String redisKey = "subscribed-" + fan.getUserId();
+                    // 获取用户订阅的列表
+                    String subscribedListStr = redisTemplate.opsForValue().get(redisKey);
+                    List<UserMomentDO> subscribedList;
+                    if (StringUtils.isNullOrEmpty(subscribedListStr)) {
+                        subscribedList = new ArrayList<>();
+                    } else {
+                        subscribedList = JSONArray.parseArray(subscribedListStr, UserMomentDO.class);
+                    }
+                    subscribedList.add(userMoment);
+                    redisTemplate.opsForValue().set(redisKey, JSONObject.toJSONString(subscribedList));
+                }
+
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             }
         });
