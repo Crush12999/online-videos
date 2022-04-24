@@ -8,9 +8,10 @@ import com.github.tobato.fastdfs.service.FastFileStorageClient;
 import com.mysql.cj.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -18,6 +19,7 @@ import java.util.*;
  * @create 2022/4/24 19:10
  * @description FastDFS工具类
  */
+@Component
 public class FastDFSUtil {
 
     @Autowired
@@ -36,6 +38,11 @@ public class FastDFSUtil {
     private static final String UPLOADED_SIZE_KEY = "uploaded-size-key:";
 
     private static final String UPLOADED_NO_KEY = "uploaded-no-key:";
+
+    /**
+     * 分片大小：默认 2M
+     */
+    private static final int SLICE_SIZE = 1024 * 1024 * 2;
 
     /**
      * 获取文件类型
@@ -164,6 +171,56 @@ public class FastDFSUtil {
             redisTemplate.delete(keyList);
         }
         return resultPath;
+    }
+
+    public void convertFileToSlices(MultipartFile multipartFile) {
+        String fileName = multipartFile.getOriginalFilename();
+        String fileType = this.getFileType(multipartFile);
+        // 将 MultipartFile 转为 Java 自带的 File 类型
+        File file = this.multipartFileToFile(multipartFile);
+        // 分片
+        long fileLength = file.length();
+        int count = 1;
+        // i 是分片大小
+        for (int i = 0; i < fileLength; i += SLICE_SIZE) {
+            try {
+                // 可以跳到文件任意位置
+                RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
+                // 定位
+                randomAccessFile.seek(i);
+                byte[] bytes = new byte[SLICE_SIZE];
+                // 根据实际情况获取读出来的数组长度
+                int len = randomAccessFile.read(bytes);
+                // 文件分片存储路径
+                String path = "/Volumes/DataDisk/UploadFile/" + count + "." + fileType;
+                File slice = new File(path);
+                FileOutputStream fos = new FileOutputStream(slice);
+                fos.write(bytes, 0, len);
+                fos.close();
+                randomAccessFile.close();
+                count++;
+            } catch (Exception e) {
+                throw new ConditionException("文件分片失败！");
+            }
+        }
+        file.delete();
+    }
+
+    public File multipartFileToFile(MultipartFile multipartFile) {
+        String originalFileName = multipartFile.getOriginalFilename();
+        String[] fileName = originalFileName.split("\\.");
+        File file = null;
+        try {
+            file = File.createTempFile(fileName[0], "." + fileName[1]);
+        } catch (IOException e) {
+            throw new ConditionException("转换失败！");
+        }
+        try {
+            multipartFile.transferTo(file);
+        } catch (IOException e) {
+            throw new ConditionException("上传失败！");
+        }
+        return file;
     }
 
 

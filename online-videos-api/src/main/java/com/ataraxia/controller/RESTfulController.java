@@ -1,6 +1,9 @@
 package com.ataraxia.controller;
 
+import com.ataraxia.util.FastDFSUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +17,9 @@ import java.util.Map;
 
 @RestController
 public class RESTfulController {
+
+    @Autowired
+    private FastDFSUtil fastDFSUtil;
 
     private final Map<Integer, Map<String, Object>> dataMap;
 
@@ -60,5 +66,10 @@ public class RESTfulController {
             dataMap.put(id, data);
         }
         return "put success！";
+    }
+
+    @GetMapping("/slices")
+    public void slices(MultipartFile file) {
+        fastDFSUtil.convertFileToSlices(file);
     }
 }
