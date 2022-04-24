@@ -8,13 +8,11 @@ import com.ataraxia.service.VideoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * @author Ataraxia
@@ -67,6 +65,36 @@ public class VideoController {
                                         HttpServletResponse response,
                                         String url) throws Exception {
         videoService.viewVideoOnlineBySlices(request, response, url);
+    }
+
+    @PostMapping("/video-likes")
+    @ApiOperation(value = "视频点赞")
+    public ResponseResult<String> saveVideoLike(@RequestParam Long videoId) {
+        Long userId = userSupport.getCurrentUserId();
+        videoService.saveVideoLike(videoId, userId);
+        return ResponseResult.success();
+    }
+
+    @DeleteMapping("/video-likes")
+    @ApiOperation(value = "取消视频点赞")
+    public ResponseResult<String> deleteVideoLike(@RequestParam Long videoId) {
+        Long userId = userSupport.getCurrentUserId();
+        videoService.deleteVideoLike(videoId, userId);
+        return ResponseResult.success();
+    }
+
+    @GetMapping("/video-likes")
+    @ApiOperation(value = "获取视频点赞数量")
+    public ResponseResult<Map<String, Object>> getVideoLikes(@RequestParam Long videoId) {
+        // 在游客模式下也可以看视频
+        Long userId = null;
+        try {
+            // 因为调用这个方法会校验token、可以在这捕捉异常，捕捉到说明用户没登录，也不影响观看，如果登录了也一样
+            userId = userSupport.getCurrentUserId();
+        } catch (Exception ignored){}
+
+        Map<String, Object> result = videoService.getVideoLikes(videoId, userId);
+        return new ResponseResult<>(result);
     }
 
 }

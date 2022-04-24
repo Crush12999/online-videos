@@ -1,8 +1,10 @@
 package com.ataraxia.service.impl;
 
 import com.ataraxia.domain.PageResult;
+import com.ataraxia.domain.VideoLikeDO;
 import com.ataraxia.domain.VideoTagDO;
 import com.ataraxia.domain.exception.ConditionException;
+import com.ataraxia.service.VideoLikeService;
 import com.ataraxia.service.VideoService;
 import com.ataraxia.util.FastDFSUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -31,6 +33,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
 
     @Autowired
     private FastDFSUtil fastDFSUtil;
+
+    @Autowired
+    private VideoLikeService videoLikeService;
 
     /**
      * 视频投稿
@@ -92,6 +97,57 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
 
         fastDFSUtil.viewVideoOnlineBySlices(request, response, url);
     }
+
+    /**
+     * 视频点赞功能
+     * @param videoId 对应视频
+     * @param userId 用户
+     */
+    @Override
+    public void saveVideoLike(Long videoId, Long userId) {
+        VideoDO video = baseMapper.selectById(videoId);
+        if (Objects.isNull(video)) {
+            throw new ConditionException("非法视频！");
+        }
+        VideoLikeDO videoLike = videoLikeService.getVideoLikeByVideoIdAndUserId(videoId, userId);
+        if (Objects.nonNull(videoLike)) {
+            throw new ConditionException("视频已点赞！");
+        }
+        videoLike = new VideoLikeDO();
+        videoLike.setVideoId(videoId);
+        videoLike.setUserId(userId);
+        videoLike.setCreateTime(new Date());
+        videoLikeService.save(videoLike);
+    }
+
+    /**
+     * 取消视频点赞
+     * @param videoId 对应视频
+     * @param userId 用户
+     */
+    @Override
+    public void deleteVideoLike(Long videoId, Long userId) {
+        videoLikeService.deleteVideoLike(videoId, userId);
+    }
+
+    /**
+     * 获取视频点赞数量
+     * @param videoId 视频id
+     * @param userId 用户id
+     * @return 相关信息
+     */
+    @Override
+    public Map<String, Object> getVideoLikes(Long videoId, Long userId) {
+        int count = videoLikeService.getVideoLikes(videoId);
+        VideoLikeDO videoLike = videoLikeService.getVideoLikeByVideoIdAndUserId(videoId, userId);
+        boolean like = videoLike != null;
+        Map<String, Object> result = new HashMap<>();
+        result.put("count", count);
+        result.put("like", like);
+        return result;
+    }
+
+
 }
 
 

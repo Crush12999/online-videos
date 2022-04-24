@@ -6,6 +6,7 @@ import com.ataraxia.domain.VideoDO;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * @author chuchen
@@ -35,6 +36,29 @@ public interface VideoService extends IService<VideoDO> {
      * @param request
      * @param response
      * @param url
+     * @throws Exception
      */
     void viewVideoOnlineBySlices(HttpServletRequest request, HttpServletResponse response, String url) throws Exception;
+
+    /**
+     * 视频点赞功能
+     * @param videoId 对应视频
+     * @param userId 用户
+     */
+    void saveVideoLike(Long videoId, Long userId);
+
+    /**
+     * 取消视频点赞
+     * @param videoId 对应视频
+     * @param userId 用户
+     */
+    void deleteVideoLike(Long videoId, Long userId);
+
+    /**
+     * 获取视频点赞数量
+     * @param videoId 视频id
+     * @param userId 用户id
+     * @return 相关信息
+     */
+    Map<String, Object> getVideoLikes(Long videoId, Long userId);
 }
