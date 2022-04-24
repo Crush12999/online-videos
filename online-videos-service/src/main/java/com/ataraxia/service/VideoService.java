@@ -1,5 +1,6 @@
 package com.ataraxia.service;
 
+import com.ataraxia.domain.PageResult;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ataraxia.domain.VideoDO;
 
@@ -16,4 +17,13 @@ public interface VideoService extends IService<VideoDO> {
      * @param video 视频
      */
     void saveVideo(VideoDO video);
+
+    /**
+     * 分页查询首页视频瀑布流
+     * @param size 一页显示几条
+     * @param no 第几页
+     * @param area 分区
+     * @return 视频瀑布流分页信息
+     */
+    PageResult<VideoDO> pageListVideos(Integer size, Integer no, String area);
 }

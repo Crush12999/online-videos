@@ -10,6 +10,7 @@ import java.util.Date;
 
 /**
  * 视频标签关联表
+ * @author chuchen
  * @TableName t_video_tag
  */
 @TableName(value ="t_video_tag")
@@ -92,5 +93,15 @@ public class VideoTagDO implements Serializable {
      */
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    @Override
+    public String toString() {
+        return "VideoTagDO{" +
+                "id=" + id +
+                ", videoId=" + videoId +
+                ", tagId=" + tagId +
+                ", createTime=" + createTime +
+                '}';
     }
 }
