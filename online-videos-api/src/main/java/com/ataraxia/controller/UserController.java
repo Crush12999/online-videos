@@ -19,8 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ataraxia
@@ -151,6 +153,28 @@ public class UserController {
         return new ResponseResult<>(result);
     }
 
+    @PostMapping("/user-dts")
+    @ApiOperation(value = "登录（双token）")
+    public ResponseResult<Map<String, Object>> loginForDoubleTokens(@RequestBody UserDO user) throws Exception  {
+        Map<String, Object> map = userService.loginForDoubleTokens(user);
+        return new ResponseResult<>(map);
+    }
 
+    @DeleteMapping("/refresh-tokens")
+    @ApiOperation(value = "退出登录")
+    public ResponseResult<String> logout(HttpServletRequest request) {
+        String refreshToken = request.getHeader("refreshToken");
+        Long userId = userSupport.getCurrentUserId();
+        userService.logout(refreshToken, userId);
+        return ResponseResult.success();
+    }
+
+    @PostMapping("/access-tokens")
+    @ApiOperation(value = "刷新accessToken令牌")
+    public ResponseResult<String> refreshAccessToken(HttpServletRequest request) throws Exception {
+        String refreshToken = request.getHeader("refreshToken");
+        String accessToken = userService.refreshAccessToken(refreshToken);
+        return new ResponseResult<>(accessToken);
+    }
 
 }

@@ -5,4 +5,18 @@
 
 <mapper namespace="com.ataraxia.mapper.UserMapper">
 
+    <insert id="insertRefreshToken">
+        insert into t_refresh_token (refresh_token, user_id, create_time)
+        values (#{refreshToken}, #{userId}, #{createTime})
+    </insert>
+
+    <delete id="deleteRefreshToken">
+        delete
+        from t_refresh_token
+        where refresh_token = #{refreshToken}
+    </delete>
+
+    <select id="getRefreshTokenDetail" resultType="com.ataraxia.domain.RefreshTokenDO">
+        select * from t_refresh_token where refresh_token = #{refreshToken}
+    </select>
 </mapper>

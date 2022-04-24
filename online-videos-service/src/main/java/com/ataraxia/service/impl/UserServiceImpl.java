@@ -2,6 +2,7 @@ package com.ataraxia.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.ataraxia.domain.PageResult;
+import com.ataraxia.domain.RefreshTokenDO;
 import com.ataraxia.domain.UserDO;
 import com.ataraxia.domain.UserInfoDO;
 import com.ataraxia.domain.constant.UserConstant;
@@ -22,10 +23,7 @@ import com.mysql.cj.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ataraxia
@@ -46,7 +44,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     /**
      * 创建用户
-     *
      * @param user 用户
      */
     @Override
@@ -126,8 +123,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         if (!md5Password.equals(dbUser.getPassword())) {
             throw new ConditionException("密码错误！");
         }
-        TokenUtil tokenUtil = new TokenUtil();
-
         return tokenUtil.generateToken(dbUser.getId());
     }
 
@@ -169,6 +164,70 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
         IPage<UserInfoDO> userInfoPage = userInfoService.page(page, wrapper);
         return new PageResult<>(userInfoPage.getTotal(), userInfoPage.getRecords());
+    }
+
+    /**
+     * 登录获取双token
+     * @param user 用户登录信息
+     * @return 双token
+     * @throws Exception 异常
+     */
+    @Override
+    public Map<String, Object> loginForDoubleTokens(UserDO user) throws Exception {
+        String phone = user.getPhone();
+        if (StringUtils.isNullOrEmpty(phone)) {
+            throw  new ConditionException("手机号不能为空！");
+        }
+        UserDO dbUser = this.getUserByPhone(phone);
+        if (Objects.isNull(dbUser)) {
+            throw new ConditionException("当前用户不存在！");
+        }
+        String password = user.getPassword();
+        String rawPassword;
+        try {
+            rawPassword = RSAUtil.decrypt(password);
+        } catch (Exception e) {
+            throw new ConditionException("密码解密失败！");
+        }
+        String salt = dbUser.getSalt();
+        String md5Password = MD5Util.sign(rawPassword, salt, "UTF-8");
+        if (!md5Password.equals(dbUser.getPassword())) {
+            throw new ConditionException("密码错误！");
+        }
+
+        Long userId = dbUser.getId();
+        String accessToken = tokenUtil.generateToken(userId);
+        String refreshToken = tokenUtil.generateRefreshToken(userId);
+        // 保存refreshToken到数据库
+        baseMapper.deleteRefreshToken(refreshToken, userId);
+        baseMapper.insertRefreshToken(refreshToken, userId, new Date());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("accessToken", accessToken);
+        result.put("refreshToken", refreshToken);
+
+        return result;
+    }
+
+    @Override
+    public void logout(String refreshToken, Long userId) {
+        baseMapper.deleteRefreshToken(refreshToken, userId);
+    }
+
+    /**
+     * 刷新 accessToken 令牌
+     * @param refreshToken 刷新令牌
+     * @return 刷新后的 accessToken
+     */
+    @Override
+    public String refreshAccessToken(String refreshToken) throws Exception {
+        RefreshTokenDO refreshTokenDetail = baseMapper.getRefreshTokenDetail(refreshToken);
+        if (Objects.isNull(refreshTokenDetail)) {
+            throw new ConditionException("555", "token已过期！");
+        }
+        Long userId = refreshTokenDetail.getUserId();
+
+        return tokenUtil.generateToken(userId);
     }
 
 

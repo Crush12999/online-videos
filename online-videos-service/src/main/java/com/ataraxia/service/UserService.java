@@ -7,6 +7,7 @@ import com.ataraxia.domain.UserInfoDO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -55,4 +56,26 @@ public interface UserService extends IService<UserDO> {
      * @return 分页查询结果
      */
     PageResult<UserInfoDO> getPageListUserInfos(JSONObject params);
+
+    /**
+     * 登录获取双token
+     * @param user 用户登录信息
+     * @return 双token
+     * @throws Exception 异常
+     */
+    Map<String, Object> loginForDoubleTokens(UserDO user) throws Exception;
+
+    /**
+     * 退出登录
+     * @param refreshToken 刷新令牌
+     * @param userId 用户id
+     */
+    void logout(String refreshToken, Long userId);
+
+    /**
+     * 刷新 accessToken 令牌
+     * @param refreshToken 刷新令牌
+     * @return 刷新后的 accessToken
+     */
+    String refreshAccessToken(String refreshToken) throws Exception;
 }

@@ -64,4 +64,24 @@ public class TokenUtil {
             throw new ConditionException("非法用户token！");
         }
     }
+
+    public String generateRefreshToken(Long userId) throws Exception {
+        // 使用RSA256算法加密
+        Algorithm algorithm = Algorithm.RSA256(RSAUtil.getPublicKey(), RSAUtil.getPrivateKey());
+        Calendar calendar = Calendar.getInstance();
+        // 当前时间
+        calendar.setTime(new Date());
+        // 超时时间
+        calendar.add(Calendar.DAY_OF_MONTH, 7);
+
+        return JWT.create()
+                // 唯一身份标识
+                .withKeyId(String.valueOf(userId))
+                // 签发者
+                .withIssuer(ISSUER)
+                // 过期时间
+                .withExpiresAt(calendar.getTime())
+                // 签名
+                .sign(algorithm);
+    }
 }
