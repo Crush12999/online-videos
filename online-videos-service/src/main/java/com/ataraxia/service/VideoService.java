@@ -4,6 +4,9 @@ import com.ataraxia.domain.PageResult;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ataraxia.domain.VideoDO;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * @author chuchen
  * @description 针对表【t_video(视频投稿记录表)】的数据库操作Service
@@ -26,4 +29,12 @@ public interface VideoService extends IService<VideoDO> {
      * @return 视频瀑布流分页信息
      */
     PageResult<VideoDO> pageListVideos(Integer size, Integer no, String area);
+
+    /**
+     * 视频在线观看
+     * @param request
+     * @param response
+     * @param url
+     */
+    void viewVideoOnlineBySlices(HttpServletRequest request, HttpServletResponse response, String url) throws Exception;
 }

@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * @author Ataraxia
  * @create 2022/4/24 22:41
@@ -52,5 +55,18 @@ public class VideoController {
         return new ResponseResult<>(result);
     }
 
+    /**
+     * 视频在线观看
+     * @param request
+     * @param response
+     * @param url
+     */
+    @GetMapping("/video-slices")
+    @ApiOperation(value = "视频在线观看")
+    public void viewVideoOnlineBySlices(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        String url) throws Exception {
+        videoService.viewVideoOnlineBySlices(request, response, url);
+    }
 
 }

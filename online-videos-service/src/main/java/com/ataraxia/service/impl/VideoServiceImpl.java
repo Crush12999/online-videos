@@ -4,6 +4,7 @@ import com.ataraxia.domain.PageResult;
 import com.ataraxia.domain.VideoTagDO;
 import com.ataraxia.domain.exception.ConditionException;
 import com.ataraxia.service.VideoService;
+import com.ataraxia.util.FastDFSUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -11,9 +12,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ataraxia.domain.VideoDO;
 import com.ataraxia.mapper.VideoMapper;
 import com.mysql.cj.util.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 /**
@@ -24,6 +28,9 @@ import java.util.*;
 @Service
 public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
         implements VideoService {
+
+    @Autowired
+    private FastDFSUtil fastDFSUtil;
 
     /**
      * 视频投稿
@@ -70,6 +77,20 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
         List<VideoDO> list = pageData.getRecords();
 
         return new PageResult<>(page.getTotal(), list);
+    }
+
+    /**
+     * 视频在线观看
+     * @param request
+     * @param response
+     * @param url
+     */
+    @Override
+    public void viewVideoOnlineBySlices(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        String url) throws Exception {
+
+        fastDFSUtil.viewVideoOnlineBySlices(request, response, url);
     }
 }
 

@@ -1,16 +1,20 @@
 package com.ataraxia.util;
 
 import com.ataraxia.domain.exception.ConditionException;
+import com.github.tobato.fastdfs.domain.fdfs.FileInfo;
 import com.github.tobato.fastdfs.domain.fdfs.MetaData;
 import com.github.tobato.fastdfs.domain.fdfs.StorePath;
 import com.github.tobato.fastdfs.service.AppendFileStorageClient;
 import com.github.tobato.fastdfs.service.FastFileStorageClient;
 import com.mysql.cj.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
 
@@ -38,6 +42,9 @@ public class FastDFSUtil {
     private static final String UPLOADED_SIZE_KEY = "uploaded-size-key:";
 
     private static final String UPLOADED_NO_KEY = "uploaded-no-key:";
+
+    @Value("${fdfs.http.storage-addr}")
+    private String httpFdfsStorageAddr;
 
     /**
      * 分片大小：默认 2M
@@ -233,4 +240,54 @@ public class FastDFSUtil {
         fastFileStorageClient.deleteFile(filePath);
     }
 
+    /**
+     * 在线观看视频
+     *
+     * @param request
+     * @param response
+     * @param url
+     */
+    public void viewVideoOnlineBySlices(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        String url) throws Exception {
+        FileInfo fileInfo = fastFileStorageClient.queryFileInfo(DEFAULT_GROUP, url);
+        long totalFileSize = fileInfo.getFileSize();
+        String realUrl = httpFdfsStorageAddr + url;
+
+        Enumeration<String> headerNames = request.getHeaderNames();
+        Map<String, Object> headers = new HashMap<>();
+        while (headerNames.hasMoreElements()) {
+            String header = headerNames.nextElement();
+            headers.put(header, request.getHeader(header));
+        }
+        // 获取视频正在播放的分片位置
+        String rangeStr = request.getHeader("Range");
+        String[] range;
+        if (StringUtils.isNullOrEmpty(rangeStr)) {
+            rangeStr = "bytes=0-" + (totalFileSize - 1);
+        }
+        range = rangeStr.split("bytes=|-");
+        long begin = 0L;
+        // 说明只有开始的，没有结束的
+        if (range.length >= 2) {
+            begin = Long.parseLong(range[1]);
+        }
+        long end = totalFileSize - 1;
+        if (range.length >= 3) {
+            end = Long.parseLong(range[2]);
+        }
+        long len = (end - begin) + 1;
+
+        // 放到响应头中标识视频播放信息，响应参数设置
+        String contentRange = "bytes " + begin + "-" + end + "/" + totalFileSize;
+        response.setHeader("Content-Range", contentRange);
+        response.setHeader("Accept-Ranges", "bytes");
+        response.setHeader("Content-Type", "video/mp4");
+        response.setContentLength((int) len);
+        response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+
+        // 获取视频流
+        HttpUtil.get(realUrl, headers, response);
+
+    }
 }
