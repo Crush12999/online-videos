@@ -42,7 +42,7 @@ public class FastDFSUtil {
     /**
      * 分片大小：默认 2M
      */
-    private static final int SLICE_SIZE = 1024 * 1024 * 2;
+    private static final int SLICE_SIZE = 1024 * 1024 * 1;
 
     /**
      * 获取文件类型
