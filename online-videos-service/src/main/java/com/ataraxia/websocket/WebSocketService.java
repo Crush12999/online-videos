@@ -13,6 +13,7 @@ import org.apache.rocketmq.common.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -61,7 +62,8 @@ public class WebSocketService {
     public void openConnection(Session session, @PathParam("token") String token) {
         try {
             this.userId = TokenUtil.verifyToken(token);
-        } catch (Exception ignored){}
+        } catch (Exception ignored) {
+        }
         this.sessionId = session.getId();
         this.session = session;
         // 是否有这个sessionId
@@ -127,6 +129,25 @@ public class WebSocketService {
     @OnError
     public void onError(Throwable error) {
 
+    }
+
+    /**
+     * 统计在线人数
+     * 指定时间间隔为5秒，每5秒发送一次当前在线人数
+     *
+     * @throws IOException IO异常
+     */
+    @Scheduled(fixedRate = 5000)
+    private void noticeOnlineCount() throws IOException {
+        for (Map.Entry<String, WebSocketService> entry : WebSocketService.WEBSOCKET_MAP.entrySet()) {
+            WebSocketService webSocketService = entry.getValue();
+            if (webSocketService.session.isOpen()) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("onlineCount", ONLINE_COUNT.get());
+                jsonObject.put("msg", "当前在线人数为：" + ONLINE_COUNT.get());
+                webSocketService.sendMessage(jsonObject.toJSONString());
+            }
+        }
     }
 
     public void sendMessage(String message) throws IOException {
