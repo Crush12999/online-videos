@@ -111,7 +111,8 @@ public class WebSocketService {
                     barrage.setUserId(userId);
                     barrage.setCreateTime(new Date());
                     BarrageService barrageService = (BarrageService) APPLICATION_CONTEXT.getBean("barrageService");
-                    barrageService.saveBarrage(barrage);
+                    // TODO: 使用MQ对弹幕持久化进行削峰，降低服务器压力和防止数据丢失
+                    barrageService.asyncSaveBarrage(barrage);
                     // 保存弹幕到redis
                     barrageService.saveBarrageToRedis(barrage);
                 }

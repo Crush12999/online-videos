@@ -19,5 +19,5 @@ public interface BarrageMapper extends BaseMapper<BarrageDO> {
      * @param params 查询参数
      * @return 弹幕列表
      */
-    List<BarrageDO> listBarrage(Map<String, Object> params);
+    List<BarrageDO> listBarrages(Map<String, Object> params);
 }

@@ -4,6 +4,8 @@ import com.ataraxia.websocket.WebSocketService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * @author Ataraxia
@@ -11,6 +13,8 @@ import org.springframework.context.ApplicationContext;
  * @description 项目启动类
  */
 
+@EnableAsync
+@EnableTransactionManagement
 @SpringBootApplication
 public class OnlineVideosApplication {
     public static void main(String[] args) {
