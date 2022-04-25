@@ -39,9 +39,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     @Autowired
     private UserAuthService userAuthService;
 
-    @Autowired
-    private TokenUtil tokenUtil;
-
     /**
      * 创建用户
      * @param user 用户
@@ -123,7 +120,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         if (!md5Password.equals(dbUser.getPassword())) {
             throw new ConditionException("密码错误！");
         }
-        return tokenUtil.generateToken(dbUser.getId());
+        return TokenUtil.generateToken(dbUser.getId());
     }
 
     @Override
@@ -196,8 +193,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         }
 
         Long userId = dbUser.getId();
-        String accessToken = tokenUtil.generateToken(userId);
-        String refreshToken = tokenUtil.generateRefreshToken(userId);
+        String accessToken = TokenUtil.generateToken(userId);
+        String refreshToken = TokenUtil.generateRefreshToken(userId);
         // 保存refreshToken到数据库
         baseMapper.deleteRefreshToken(refreshToken, userId);
         baseMapper.insertRefreshToken(refreshToken, userId, new Date());
@@ -227,7 +224,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         }
         Long userId = refreshTokenDetail.getUserId();
 
-        return tokenUtil.generateToken(userId);
+        return TokenUtil.generateToken(userId);
     }
 
     /**

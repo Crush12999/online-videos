@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ataraxia.mapper.BarrageMapper">
+
+    <select id="listBarrage" resultType="com.ataraxia.domain.BarrageDO">
+        select *
+        from t_barrage
+        where
+            video_id = #{videoId}
+            <if test="startDate != null and startDate != ''">
+                and create_time <![CDATA[>=]]> #{createTime}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and create_time <![CDATA[<=]]> #{endDate}
+            </if>
+    </select>
+</mapper>

@@ -16,9 +16,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Component
 public class UserSupport {
 
-    @Autowired
-    private TokenUtil tokenUtil;
-
     /**
      * 获取当前用户ID
      * @return 当前用户ID
@@ -27,7 +24,7 @@ public class UserSupport {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         // 从请求头中获取 Token
         String token = requestAttributes.getRequest().getHeader("token");
-        Long userId = tokenUtil.verifyToken(token);
+        Long userId = TokenUtil.verifyToken(token);
         if (userId < 0) {
             throw new ConditionException("非法用户！");
         }

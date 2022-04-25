@@ -44,7 +44,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, FileDO> implements 
                                      Integer totalSliceNo) {
 
         FileDO dbFileMd5 = this.uploadFileByMd5(fileMd5);
-        if (Objects.isNull(dbFileMd5)) {
+        if (!Objects.isNull(dbFileMd5)) {
             return dbFileMd5.getUrl();
         }
         String url = fastDFSUtil.uploadFileBySlices(slice, fileMd5, sliceNo, totalSliceNo);

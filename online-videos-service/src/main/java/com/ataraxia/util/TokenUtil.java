@@ -30,7 +30,7 @@ public class TokenUtil {
      * @return Token令牌
      * @throws Exception RSA工具类异常
      */
-    public String generateToken(Long userId) throws Exception {
+    public static String generateToken(Long userId) throws Exception {
         // 使用RSA256算法加密
         Algorithm algorithm = Algorithm.RSA256(RSAUtil.getPublicKey(), RSAUtil.getPrivateKey());
         Calendar calendar = Calendar.getInstance();
@@ -50,7 +50,7 @@ public class TokenUtil {
                 .sign(algorithm);
     }
 
-    public Long verifyToken(String token) {
+    public static Long verifyToken(String token) {
         Algorithm algorithm = null;
         try {
             algorithm = Algorithm.RSA256(RSAUtil.getPublicKey(), RSAUtil.getPrivateKey());
@@ -65,7 +65,7 @@ public class TokenUtil {
         }
     }
 
-    public String generateRefreshToken(Long userId) throws Exception {
+    public static String generateRefreshToken(Long userId) throws Exception {
         // 使用RSA256算法加密
         Algorithm algorithm = Algorithm.RSA256(RSAUtil.getPublicKey(), RSAUtil.getPrivateKey());
         Calendar calendar = Calendar.getInstance();
