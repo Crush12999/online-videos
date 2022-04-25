@@ -1,10 +1,7 @@
 package com.ataraxia.controller;
 
 import com.ataraxia.controller.support.UserSupport;
-import com.ataraxia.domain.PageResult;
-import com.ataraxia.domain.ResponseResult;
-import com.ataraxia.domain.VideoCollectionDO;
-import com.ataraxia.domain.VideoDO;
+import com.ataraxia.domain.*;
 import com.ataraxia.service.VideoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -56,6 +53,7 @@ public class VideoController {
 
     /**
      * 视频在线观看
+     *
      * @param request
      * @param response
      * @param url
@@ -92,7 +90,8 @@ public class VideoController {
         try {
             // 因为调用这个方法会校验token、可以在这捕捉异常，捕捉到说明用户没登录，也不影响观看，如果登录了也一样
             userId = userSupport.getCurrentUserId();
-        } catch (Exception ignored){}
+        } catch (Exception ignored) {
+        }
 
         Map<String, Object> result = videoService.getVideoLikes(videoId, userId);
         return new ResponseResult<>(result);
@@ -120,8 +119,30 @@ public class VideoController {
         Long userId = null;
         try {
             userId = userSupport.getCurrentUserId();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         Map<String, Object> result = videoService.getVideoCollections(videoId, userId);
+        return new ResponseResult<>(result);
+    }
+
+
+    @PostMapping("/video-coins")
+    @ApiOperation(value = "视频投币")
+    public ResponseResult<String> saveVideoCoins(@RequestBody VideoCoinDO videoCoin) {
+        Long userId = userSupport.getCurrentUserId();
+        videoService.saveVideoCoins(videoCoin, userId);
+        return ResponseResult.success();
+    }
+
+
+    @GetMapping("/video-coins")
+    @ApiOperation(value = "查询视频投币数量")
+    public ResponseResult<Map<String, Object>> getVideoCoins(@RequestParam Long videoId) {
+        Long userId = null;
+        try {
+            userId = userSupport.getCurrentUserId();
+        } catch (Exception ignored) {}
+        Map<String, Object> result = videoService.getVideoCoins(videoId, userId);
         return new ResponseResult<>(result);
     }
 

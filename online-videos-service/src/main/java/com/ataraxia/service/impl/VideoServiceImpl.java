@@ -2,6 +2,7 @@ package com.ataraxia.service.impl;
 
 import com.ataraxia.domain.*;
 import com.ataraxia.domain.exception.ConditionException;
+import com.ataraxia.service.UserCoinService;
 import com.ataraxia.service.VideoLikeService;
 import com.ataraxia.service.VideoService;
 import com.ataraxia.util.FastDFSUtil;
@@ -33,6 +34,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
 
     @Autowired
     private VideoLikeService videoLikeService;
+
+    @Autowired
+    private UserCoinService userCoinService;
 
     /**
      * 视频投稿
@@ -197,6 +201,73 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
         Long count = baseMapper.getVideoCollections(videoId);
         VideoCollectionDO videoCollection = baseMapper.getVideoCollectionByVideoIdAndUserId(videoId, userId);
         boolean like = videoCollection != null;
+        Map<String, Object> result = new HashMap<>();
+        result.put("count", count);
+        result.put("like", like);
+        return result;
+    }
+
+    /**
+     * 视频投币
+     *
+     * @param videoCoin 视频硬币
+     * @param userId    用户id
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void saveVideoCoins(VideoCoinDO videoCoin, Long userId) {
+        Long videoId = videoCoin.getVideoId();
+        Integer amount = videoCoin.getAmount();
+        if (Objects.isNull(videoId)) {
+            throw new ConditionException("参数异常！");
+        }
+        VideoDO video = baseMapper.selectById(videoId);
+        if (Objects.isNull(video)) {
+            throw new ConditionException("非法视频！");
+        }
+
+        // 查询当前登录用户是否拥有足够的硬币
+        Long userCoinsAmount = userCoinService.getUserCoinsAmount(userId);
+        userCoinsAmount = userCoinsAmount == null ? 0L : userCoinsAmount;
+        if (amount > userCoinsAmount) {
+            throw new ConditionException("硬币数量不足！");
+        }
+
+        // 查询当前登录用户对该视频已经投了多少硬币
+        VideoCoinDO dbVideoCoin = baseMapper.getVideoCoinByVideoIdAndUserId(videoId, userId);
+
+        // 新增视频投币
+        if (Objects.isNull(dbVideoCoin)) {
+            videoCoin.setUserId(userId);
+            videoCoin.setCreateTime(new Date());
+            baseMapper.saveVideoCoin(videoCoin);
+        } else {
+            Integer dbAmount = dbVideoCoin.getAmount();
+            dbAmount += amount;
+            // 更新视频投币
+            videoCoin.setUserId(userId);
+            videoCoin.setAmount(dbAmount);
+            videoCoin.setUpdateTime(new Date());
+            baseMapper.updateVideoCoin(videoCoin);
+        }
+
+        // 更新用户当前硬币总数
+        userCoinService.updateUserCoinsAmount(userId, (userCoinsAmount - amount));
+
+    }
+
+    /**
+     * 获取视频投币数以及用户是否已投币
+     *
+     * @param videoId 视频id
+     * @param userId  用户id
+     * @return 相关信息
+     */
+    @Override
+    public Map<String, Object> getVideoCoins(Long videoId, Long userId) {
+        Long count = baseMapper.getVideoCoinsAmount(videoId);
+        VideoCoinDO videoCoin = baseMapper.getVideoCoinByVideoIdAndUserId(videoId, userId);
+        boolean like = videoCoin != null;
         Map<String, Object> result = new HashMap<>();
         result.put("count", count);
         result.put("like", like);

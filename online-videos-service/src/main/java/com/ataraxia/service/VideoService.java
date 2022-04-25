@@ -1,6 +1,7 @@
 package com.ataraxia.service;
 
 import com.ataraxia.domain.PageResult;
+import com.ataraxia.domain.VideoCoinDO;
 import com.ataraxia.domain.VideoCollectionDO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ataraxia.domain.VideoDO;
@@ -92,4 +93,21 @@ public interface VideoService extends IService<VideoDO> {
      * @return 相应数据
      */
     Map<String, Object> getVideoCollections(Long videoId, Long userId);
+
+    /**
+     * 视频投币
+     *
+     * @param videoCoin 视频硬币
+     * @param userId    用户id
+     */
+    void saveVideoCoins(VideoCoinDO videoCoin, Long userId);
+
+    /**
+     * 获取视频投币数以及用户是否已投币
+     *
+     * @param videoId 视频id
+     * @param userId  用户id
+     * @return 相关信息
+     */
+    Map<String, Object> getVideoCoins(Long videoId, Long userId);
 }

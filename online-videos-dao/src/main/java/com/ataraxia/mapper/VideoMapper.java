@@ -1,5 +1,6 @@
 package com.ataraxia.mapper;
 
+import com.ataraxia.domain.VideoCoinDO;
 import com.ataraxia.domain.VideoCollectionDO;
 import com.ataraxia.domain.VideoTagDO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -56,6 +57,37 @@ public interface VideoMapper extends BaseMapper<VideoDO> {
      * @return 视频收藏实例
      */
     VideoCollectionDO getVideoCollectionByVideoIdAndUserId(@Param("videoId") Long videoId, @Param("userId") Long userId);
+
+    /**
+     * 查询当前登录用户对该视频已经投了多少硬币
+     *
+     * @param videoId 视频id
+     * @param userId  用户id
+     * @return 已投币数
+     */
+    VideoCoinDO getVideoCoinByVideoIdAndUserId(@Param("videoId") Long videoId, @Param("userId") Long userId);
+
+    /**
+     * 新增视频投币
+     *
+     * @param videoCoin 视频硬币
+     */
+    void saveVideoCoin(@Param("videoCoin") VideoCoinDO videoCoin);
+
+    /**
+     * 更新视频投币
+     *
+     * @param videoCoin 视频硬币
+     */
+    void updateVideoCoin(@Param("videoCoin") VideoCoinDO videoCoin);
+
+    /**
+     * 获取视频投币数
+     *
+     * @param videoId 视频id
+     * @return 视频投币数
+     */
+    Long getVideoCoinsAmount(@Param("videoId") Long videoId);
 }
 
 
