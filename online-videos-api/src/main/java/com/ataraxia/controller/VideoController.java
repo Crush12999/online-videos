@@ -141,8 +141,28 @@ public class VideoController {
         Long userId = null;
         try {
             userId = userSupport.getCurrentUserId();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         Map<String, Object> result = videoService.getVideoCoins(videoId, userId);
+        return new ResponseResult<>(result);
+    }
+
+    @PostMapping("/video-comments")
+    @ApiOperation(value = "发布视频评论")
+    public ResponseResult<String> saveVideoComment(@RequestBody VideoCommentDO videoComment) {
+        Long userId = userSupport.getCurrentUserId();
+        videoService.saveVideoComment(videoComment, userId);
+        return ResponseResult.success();
+    }
+
+    /**
+     * 分页查询视频评论
+     */
+    @GetMapping("/video-comments")
+    public ResponseResult<PageResult<VideoCommentDO>> pageListVideoComments(@RequestParam Integer size,
+                                                                          @RequestParam Integer no,
+                                                                          @RequestParam Long videoId) {
+        PageResult<VideoCommentDO> result = videoService.pageListVideoComments(size, no, videoId);
         return new ResponseResult<>(result);
     }
 

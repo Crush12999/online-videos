@@ -42,6 +42,21 @@
                 #{videoCoin.createTime})
     </insert>
 
+    <insert id="saveVideoComment" parameterType="com.ataraxia.domain.VideoCommentDO">
+        insert into t_video_comment(video_id,
+                                    user_id,
+                                    comment,
+                                    reply_user_id,
+                                    root_id,
+                                    create_time)
+        values (#{videoId},
+                #{userId},
+                #{comment},
+                #{replyUserId},
+                #{rootId},
+                #{createTime})
+    </insert>
+
     <update id="updateVideoCoin">
         update t_video_coin
         set amount      = #{videoCoin.amount},
@@ -81,6 +96,36 @@
         select sum(amount)
         from t_video_coin
         where video_id = #{videoId}
+    </select>
+
+    <select id="pageCountVideoComments" parameterType="java.util.Map" resultType="java.lang.Long">
+        select count(1)
+        from t_video_comment
+        where video_id = #{videoId}
+          and root_id is null
+    </select>
+
+    <select id="pageListVideoComments" parameterType="java.util.Map" resultType="com.ataraxia.domain.VideoCommentDO">
+        select *
+        from t_video_comment
+        where video_id = #{videoId}
+          and root_id is null
+        order by id desc
+        limit #{start}, #{limit}
+    </select>
+
+    <select id="listBatchVideoCommentsByRootIds" parameterType="java.util.List"
+            resultType="com.ataraxia.domain.VideoCommentDO">
+        select
+        *
+        from
+        t_video_comment
+        where
+        root_id in
+        <foreach collection="rootIdList" item="rootId" open="(" close=")" separator=",">
+            #{rootId}
+        </foreach>
+        order by id
     </select>
 
 </mapper>

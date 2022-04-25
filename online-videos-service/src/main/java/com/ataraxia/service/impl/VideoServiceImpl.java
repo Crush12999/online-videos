@@ -3,6 +3,7 @@ package com.ataraxia.service.impl;
 import com.ataraxia.domain.*;
 import com.ataraxia.domain.exception.ConditionException;
 import com.ataraxia.service.UserCoinService;
+import com.ataraxia.service.UserService;
 import com.ataraxia.service.VideoLikeService;
 import com.ataraxia.service.VideoService;
 import com.ataraxia.util.FastDFSUtil;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author chuchen
@@ -37,6 +39,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
 
     @Autowired
     private UserCoinService userCoinService;
+
+    @Autowired
+    private UserService userService;
 
     /**
      * 视频投稿
@@ -88,9 +93,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
     /**
      * 视频在线观看
      *
-     * @param request
-     * @param response
-     * @param url
+     * @param request request
+     * @param response response
+     * @param url 视频地址
      */
     @Override
     public void viewVideoOnlineBySlices(HttpServletRequest request,
@@ -272,6 +277,78 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
         result.put("count", count);
         result.put("like", like);
         return result;
+    }
+
+    /**
+     * 发布视频评论
+     *
+     * @param videoComment 视频评论
+     * @param userId       用户id
+     */
+    @Override
+    public void saveVideoComment(VideoCommentDO videoComment, Long userId) {
+        Long videoId = videoComment.getVideoId();
+        if (videoId == null) {
+            throw new ConditionException("参数异常！");
+        }
+        VideoDO video = baseMapper.selectById(videoId);
+        if (video == null) {
+            throw new ConditionException("非法视频！");
+        }
+        videoComment.setUserId(userId);
+        videoComment.setCreateTime(new Date());
+
+        baseMapper.saveVideoComment(videoComment);
+    }
+
+    /**
+     * 分页查询视频评论
+     *
+     * @param size    每页显示的条数
+     * @param no      当前页
+     * @param videoId 视频id
+     * @return 视频评论分页列表
+     */
+    @Override
+    public PageResult<VideoCommentDO> pageListVideoComments(Integer size, Integer no, Long videoId) {
+        VideoDO video = baseMapper.selectById(videoId);
+        if (video == null) {
+            throw new ConditionException("非法视频！");
+        }
+        Map<String, Object> params = new HashMap<>();
+        params.put("start", (no - 1) * size);
+        params.put("limit", size);
+        params.put("videoId", videoId);
+        Long total = baseMapper.pageCountVideoComments(params);
+        List<VideoCommentDO> list = new ArrayList<>();
+        if (total > 0) {
+            list = baseMapper.pageListVideoComments(params);
+            // 批量查询二级评论
+            List<Long> parentIdList = list.stream().map(VideoCommentDO::getId).collect(Collectors.toList());
+            List<VideoCommentDO> childCommentList = baseMapper.listBatchVideoCommentsByRootIds(parentIdList);
+            // 批量查询用户信息
+            Set<Long> userIdList = list.stream().map(VideoCommentDO::getUserId).collect(Collectors.toSet());
+            Set<Long> replyUserIdList = childCommentList.stream().map(VideoCommentDO::getUserId).collect(Collectors.toSet());
+            Set<Long> childUserIdList = childCommentList.stream().map(VideoCommentDO::getReplyUserId).collect(Collectors.toSet());
+            userIdList.addAll(replyUserIdList);
+            userIdList.addAll(childUserIdList);
+            List<UserInfoDO> userInfoList = userService.listBatchUserInfoByUserIds(userIdList);
+            Map<Long, UserInfoDO> userInfoMap = userInfoList.stream().collect(Collectors.toMap(UserInfoDO::getUserId, userInfo -> userInfo));
+            list.forEach(comment -> {
+                Long id = comment.getId();
+                List<VideoCommentDO> childList = new ArrayList<>();
+                childCommentList.forEach(child -> {
+                    if (id.equals(child.getRootId())) {
+                        child.setUserInfo(userInfoMap.get(child.getUserId()));
+                        child.setReplyUserInfo(userInfoMap.get(child.getReplyUserId()));
+                        childList.add(child);
+                    }
+                });
+                comment.setChildList(childList);
+                comment.setUserInfo(userInfoMap.get(comment.getUserId()));
+            });
+        }
+        return new PageResult<>(total, list);
     }
 
 

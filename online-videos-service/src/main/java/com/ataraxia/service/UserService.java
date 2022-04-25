@@ -18,12 +18,14 @@ import java.util.Set;
 public interface UserService extends IService<UserDO> {
     /**
      * 创建用户
+     *
      * @param user 用户
      */
     void insertUser(UserDO user);
 
     /**
      * 通过手机号获取用户
+     *
      * @param phone 手机号
      * @return 用户
      */
@@ -31,6 +33,7 @@ public interface UserService extends IService<UserDO> {
 
     /**
      * 用户登录
+     *
      * @param user
      * @return
      * @throws Exception
@@ -39,6 +42,7 @@ public interface UserService extends IService<UserDO> {
 
     /**
      * 获取用户信息
+     *
      * @param userId
      * @return
      */
@@ -46,12 +50,14 @@ public interface UserService extends IService<UserDO> {
 
     /**
      * 更新用户
+     *
      * @param user
      */
     void updateUser(UserDO user);
 
     /**
      * 分页查询用户信息
+     *
      * @param params 分页查询参数
      * @return 分页查询结果
      */
@@ -59,6 +65,7 @@ public interface UserService extends IService<UserDO> {
 
     /**
      * 登录获取双token
+     *
      * @param user 用户登录信息
      * @return 双token
      * @throws Exception 异常
@@ -67,15 +74,25 @@ public interface UserService extends IService<UserDO> {
 
     /**
      * 退出登录
+     *
      * @param refreshToken 刷新令牌
-     * @param userId 用户id
+     * @param userId       用户id
      */
     void logout(String refreshToken, Long userId);
 
     /**
      * 刷新 accessToken 令牌
+     *
      * @param refreshToken 刷新令牌
      * @return 刷新后的 accessToken
      */
     String refreshAccessToken(String refreshToken) throws Exception;
+
+    /**
+     * 批量查询用户信息
+     *
+     * @param userIdList 用户id列表
+     * @return 用户信息
+     */
+    List<UserInfoDO> listBatchUserInfoByUserIds(Set<Long> userIdList);
 }

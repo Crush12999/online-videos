@@ -230,5 +230,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         return tokenUtil.generateToken(userId);
     }
 
+    /**
+     * 批量查询用户信息
+     *
+     * @param userIdList 用户id列表
+     * @return 用户信息
+     */
+    @Override
+    public List<UserInfoDO> listBatchUserInfoByUserIds(Set<Long> userIdList) {
+        return userInfoService.listUserInfoByUserIds(userIdList);
+    }
+
 
 }

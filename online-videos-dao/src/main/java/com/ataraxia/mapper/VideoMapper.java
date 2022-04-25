@@ -1,14 +1,12 @@
 package com.ataraxia.mapper;
 
-import com.ataraxia.domain.VideoCoinDO;
-import com.ataraxia.domain.VideoCollectionDO;
-import com.ataraxia.domain.VideoTagDO;
+import com.ataraxia.domain.*;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.ataraxia.domain.VideoDO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author chuchen
@@ -88,6 +86,37 @@ public interface VideoMapper extends BaseMapper<VideoDO> {
      * @return 视频投币数
      */
     Long getVideoCoinsAmount(@Param("videoId") Long videoId);
+
+    /**
+     * 发布视频评论
+     *
+     * @param videoComment 视频评论
+     */
+    void saveVideoComment(VideoCommentDO videoComment);
+
+    /**
+     * 分页查询视频一级评论数量
+     *
+     * @param params 参数
+     * @return 视频评论总数
+     */
+    Long pageCountVideoComments(Map<String, Object> params);
+
+    /**
+     * 分页查询视频一级评论内容
+     *
+     * @param params 分页参数
+     * @return 视频评论内容
+     */
+    List<VideoCommentDO> pageListVideoComments(Map<String, Object> params);
+
+    /**
+     * 批量查询二级评论
+     *
+     * @param rootIdList 父评论id
+     * @return 二级评论列表
+     */
+    List<VideoCommentDO> listBatchVideoCommentsByRootIds(@Param("rootIdList") List<Long> rootIdList);
 }
 
 

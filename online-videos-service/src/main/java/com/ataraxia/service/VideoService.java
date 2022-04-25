@@ -1,10 +1,7 @@
 package com.ataraxia.service;
 
-import com.ataraxia.domain.PageResult;
-import com.ataraxia.domain.VideoCoinDO;
-import com.ataraxia.domain.VideoCollectionDO;
+import com.ataraxia.domain.*;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.ataraxia.domain.VideoDO;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -110,4 +107,22 @@ public interface VideoService extends IService<VideoDO> {
      * @return 相关信息
      */
     Map<String, Object> getVideoCoins(Long videoId, Long userId);
+
+    /**
+     * 发布视频评论
+     *
+     * @param videoComment 视频评论
+     * @param userId       用户id
+     */
+    void saveVideoComment(VideoCommentDO videoComment, Long userId);
+
+    /**
+     * 分页查询视频评论
+     *
+     * @param size    每页显示的条数
+     * @param no      当前页
+     * @param videoId 视频id
+     * @return 视频评论分页列表
+     */
+    PageResult<VideoCommentDO> pageListVideoComments(Integer size, Integer no, Long videoId);
 }
