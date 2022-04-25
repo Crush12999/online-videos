@@ -11,4 +11,8 @@ public interface UserMomentsConstant {
 
     String TOPIC_MOMENTS = "TopicMoments";
 
+    String GROUP_BARRAGES = "BarragesGroup";
+
+    String TOPIC_BARRAGES = "Topic-Barrages";
+
 }

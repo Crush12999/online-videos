@@ -6,6 +6,7 @@ import com.ataraxia.domain.UserFollowingDO;
 import com.ataraxia.domain.UserMomentDO;
 import com.ataraxia.domain.constant.UserMomentsConstant;
 import com.ataraxia.service.UserFollowingService;
+import com.ataraxia.websocket.WebSocketService;
 import com.mysql.cj.util.StringUtils;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
@@ -21,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -44,7 +46,8 @@ public class RocketMqConfig {
 
 
     /**
-     * 创建生产者实例
+     * 创建动态生产者实例
+     *
      * @return
      * @throws MQClientException
      */
@@ -59,7 +62,7 @@ public class RocketMqConfig {
     }
 
     /**
-     * 直接推送消息给消费者
+     * 直接推送动态消息给消费者
      */
     @Bean("momentsConsumer")
     public DefaultMQPushConsumer momentsConsumer() throws MQClientException {
@@ -108,6 +111,67 @@ public class RocketMqConfig {
                     redisTemplate.opsForValue().set(redisKey, JSONObject.toJSONString(subscribedList));
                 }
 
+                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+            }
+        });
+        consumer.start();
+        return consumer;
+    }
+
+    /**
+     * 创建弹幕生产者实例
+     *
+     * @return
+     * @throws MQClientException
+     */
+    @Bean("barrageProducer")
+    public DefaultMQProducer barrageProducer() throws MQClientException {
+        // 创建生产者
+        DefaultMQProducer producer = new DefaultMQProducer(UserMomentsConstant.GROUP_BARRAGES);
+        // 设置名称服务器地址
+        producer.setNamesrvAddr(nameServerAddress);
+        producer.start();
+        return producer;
+    }
+
+    /**
+     * 直接推送弹幕消息给消费者
+     */
+    @Bean("barrageConsumer")
+    public DefaultMQPushConsumer barrageConsumer() throws MQClientException {
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(UserMomentsConstant.TOPIC_BARRAGES);
+        // 设置NameServer的地址
+        consumer.setNamesrvAddr(nameServerAddress);
+
+        // 订阅一个或者多个Topic，以及Tag来过滤需要消费的信息
+        // 订阅内容，第一个参数是主题，第二个参数是相关子主题，"*"表示所有相关主题都订阅
+        consumer.subscribe(UserMomentsConstant.TOPIC_MOMENTS, "*");
+
+        // 给消费者设置监听器，当生产者推送新消息到MQ的时候，MQ会把相关消息推给消费者，消费者需要监听器抓取消息。
+        // 使用并发监听，注册回调实现类来处理从broker拉取回来的消息
+        consumer.registerMessageListener(new MessageListenerConcurrently() {
+            /**
+             * 监听器
+             * @param msgList 消息扩充，再传出的消息基础上增加一些结果
+             * @param consumeConcurrentlyContext 处理的上下文
+             * @return 处理的结果返回
+             */
+            @Override
+            public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgList, ConsumeConcurrentlyContext consumeConcurrentlyContext) {
+                MessageExt msg = msgList.get(0);
+                byte[] msgByte = msg.getBody();
+                String bodyStr = new String(msgByte);
+                JSONObject jsonObject = JSONObject.parseObject(bodyStr);
+                String sessionId = jsonObject.getString("sessionId");
+                String message = jsonObject.getString("message");
+                WebSocketService webSocketService = WebSocketService.WEBSOCKET_MAP.get(sessionId);
+                if (webSocketService.getSession().isOpen()) {
+                    try {
+                        webSocketService.sendMessage(message);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             }
         });

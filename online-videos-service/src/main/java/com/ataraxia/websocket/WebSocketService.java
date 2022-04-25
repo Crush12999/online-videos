@@ -2,10 +2,14 @@ package com.ataraxia.websocket;
 
 import com.alibaba.fastjson.JSONObject;
 import com.ataraxia.domain.BarrageDO;
+import com.ataraxia.domain.constant.UserMomentsConstant;
 import com.ataraxia.service.BarrageService;
 import com.ataraxia.service.impl.BarrageServiceImpl;
+import com.ataraxia.util.RocketMqUtil;
 import com.ataraxia.util.TokenUtil;
 import com.mysql.cj.util.StringUtils;
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.common.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -15,6 +19,7 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
@@ -38,7 +43,7 @@ public class WebSocketService {
      */
     private static final AtomicInteger ONLINE_COUNT = new AtomicInteger(0);
 
-    private static final ConcurrentHashMap<String, WebSocketService> WEBSOCKET_MAP = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, WebSocketService> WEBSOCKET_MAP = new ConcurrentHashMap<>();
 
     private Session session;
 
@@ -92,16 +97,20 @@ public class WebSocketService {
                 // 群发消息
                 for (Map.Entry<String, WebSocketService> entry : WEBSOCKET_MAP.entrySet()) {
                     WebSocketService webSocketService = entry.getValue();
+                    // 性能优化
+                    DefaultMQProducer barrageProducer = (DefaultMQProducer) APPLICATION_CONTEXT.getBean("barrageProducer");
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("message", message);
+                    jsonObject.put("sessionId", webSocketService.getSessionId());
+                    Message msg = new Message(UserMomentsConstant.TOPIC_BARRAGES, jsonObject.toJSONString().getBytes(StandardCharsets.UTF_8));
+                    RocketMqUtil.asyncSendMsg(barrageProducer, msg);
 
-                    if (webSocketService.session.isOpen()) {
-                        webSocketService.sendMessage(message);
-                    }
                 }
                 if (Objects.nonNull(this.userId)) {
                     BarrageDO barrage = JSONObject.parseObject(message, BarrageDO.class);
                     barrage.setUserId(userId);
                     barrage.setCreateTime(new Date());
-                    BarrageService barrageService = APPLICATION_CONTEXT.getBean(BarrageServiceImpl.class);
+                    BarrageService barrageService = (BarrageService) APPLICATION_CONTEXT.getBean("barrageService");
                     barrageService.saveBarrage(barrage);
                     // 保存弹幕到redis
                     barrageService.saveBarrageToRedis(barrage);
@@ -123,4 +132,11 @@ public class WebSocketService {
         this.session.getBasicRemote().sendText(message);
     }
 
+    public Session getSession() {
+        return session;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
 }
