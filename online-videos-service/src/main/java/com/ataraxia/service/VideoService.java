@@ -125,4 +125,12 @@ public interface VideoService extends IService<VideoDO> {
      * @return 视频评论分页列表
      */
     PageResult<VideoCommentDO> pageListVideoComments(Integer size, Integer no, Long videoId);
+
+    /**
+     * 获取视频详情
+     *
+     * @param videoId 视频id
+     * @return 视频详情
+     */
+    Map<String, Object> getVideoDetails(Long videoId);
 }

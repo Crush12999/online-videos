@@ -351,6 +351,24 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
         return new PageResult<>(total, list);
     }
 
+    /**
+     * 获取视频详情
+     *
+     * @param videoId 视频id
+     * @return 视频详情
+     */
+    @Override
+    public Map<String, Object> getVideoDetails(Long videoId) {
+        VideoDO video =  baseMapper.selectById(videoId);
+        Long userId = video.getUserId();
+        UserDO user = userService.getUserInfo(userId);
+        UserInfoDO userInfo = user.getUserInfo();
+        Map<String, Object> result = new HashMap<>();
+        result.put("video", video);
+        result.put("userInfo", userInfo);
+        return result;
+    }
+
 
 }
 

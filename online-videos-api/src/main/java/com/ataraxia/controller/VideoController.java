@@ -159,10 +159,18 @@ public class VideoController {
      * 分页查询视频评论
      */
     @GetMapping("/video-comments")
+    @ApiOperation(value = "分页查询视频评论")
     public ResponseResult<PageResult<VideoCommentDO>> pageListVideoComments(@RequestParam Integer size,
                                                                           @RequestParam Integer no,
                                                                           @RequestParam Long videoId) {
         PageResult<VideoCommentDO> result = videoService.pageListVideoComments(size, no, videoId);
+        return new ResponseResult<>(result);
+    }
+
+    @GetMapping("/video-details")
+    @ApiOperation(value = "获取视频详情")
+    public ResponseResult<Map<String, Object>> getVideoDetails(Long videoId) {
+        Map<String, Object> result = videoService.getVideoDetails(videoId);
         return new ResponseResult<>(result);
     }
 

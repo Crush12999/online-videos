@@ -26,7 +26,7 @@
                  left join t_auth_element_operation aeo on areo.element_operation_id = aeo.id
 
         where areo.role_id in
-            <foreach collection="roleIdSet" item="roleId" index="index" open="(" close=")" separator=", ">
+            <foreach collection="roleIdSet" item="roleId" index="idx" open="(" close=")" separator=", ">
                 #{roleId}
             </foreach>
 

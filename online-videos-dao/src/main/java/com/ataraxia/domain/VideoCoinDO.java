@@ -18,7 +18,7 @@ import java.util.Date;
 public class VideoCoinDO implements Serializable {
 
     /**
-     * 视频投稿id
+     * 主键id
      */
     @TableId(type = IdType.AUTO)
     private Long id;

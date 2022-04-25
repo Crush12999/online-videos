@@ -28,6 +28,7 @@ import java.util.Set;
  *
  *  Filter是用来过滤任务的，既可以被使用在请求资源，也可以是资源响应，或者二者都有
  *  Filter使用doFilter方法进行过滤
+ * @author chuchen
  */
 
 @Configuration
