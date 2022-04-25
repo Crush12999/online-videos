@@ -1,8 +1,6 @@
 package com.ataraxia.service.impl;
 
-import com.ataraxia.domain.PageResult;
-import com.ataraxia.domain.VideoLikeDO;
-import com.ataraxia.domain.VideoTagDO;
+import com.ataraxia.domain.*;
 import com.ataraxia.domain.exception.ConditionException;
 import com.ataraxia.service.VideoLikeService;
 import com.ataraxia.service.VideoService;
@@ -11,7 +9,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ataraxia.domain.VideoDO;
 import com.ataraxia.mapper.VideoMapper;
 import com.mysql.cj.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +83,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
 
     /**
      * 视频在线观看
+     *
      * @param request
      * @param response
      * @param url
@@ -100,8 +98,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
 
     /**
      * 视频点赞功能
+     *
      * @param videoId 对应视频
-     * @param userId 用户
+     * @param userId  用户
      */
     @Override
     public void saveVideoLike(Long videoId, Long userId) {
@@ -122,8 +121,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
 
     /**
      * 取消视频点赞
+     *
      * @param videoId 对应视频
-     * @param userId 用户
+     * @param userId  用户
      */
     @Override
     public void deleteVideoLike(Long videoId, Long userId) {
@@ -132,8 +132,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
 
     /**
      * 获取视频点赞数量
+     *
      * @param videoId 视频id
-     * @param userId 用户id
+     * @param userId  用户id
      * @return 相关信息
      */
     @Override
@@ -141,6 +142,61 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, VideoDO>
         int count = videoLikeService.getVideoLikes(videoId);
         VideoLikeDO videoLike = videoLikeService.getVideoLikeByVideoIdAndUserId(videoId, userId);
         boolean like = videoLike != null;
+        Map<String, Object> result = new HashMap<>();
+        result.put("count", count);
+        result.put("like", like);
+        return result;
+    }
+
+    /**
+     * 收藏视频
+     *
+     * @param videoCollection 视频收藏信息实例
+     * @param userId          用户id
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void saveVideoCollection(VideoCollectionDO videoCollection, Long userId) {
+        Long videoId = videoCollection.getVideoId();
+        Long groupId = videoCollection.getGroupId();
+        if (Objects.isNull(videoId) || Objects.isNull(groupId)) {
+            throw new ConditionException("参数异常！");
+        }
+        VideoDO video = baseMapper.selectById(videoId);
+        if (Objects.isNull(video)) {
+            throw new ConditionException("非法视频！");
+        }
+        // 删除原有视频收藏
+        baseMapper.deleteVideoCollection(videoId, userId);
+        // 添加原有视频收藏
+        videoCollection.setUserId(userId);
+        videoCollection.setCreateTime(new Date());
+        baseMapper.saveVideoCollection(videoCollection);
+    }
+
+    /**
+     * 取消收藏视频
+     *
+     * @param videoId 视频id
+     * @param userId  用户id
+     */
+    @Override
+    public void deleteVideoCollection(Long videoId, Long userId) {
+        baseMapper.deleteVideoCollection(videoId, userId);
+    }
+
+    /**
+     * 查询视频收藏数以及当前用户是否已收藏视频
+     *
+     * @param videoId 视频id
+     * @param userId  用户id
+     * @return 相应数据
+     */
+    @Override
+    public Map<String, Object> getVideoCollections(Long videoId, Long userId) {
+        Long count = baseMapper.getVideoCollections(videoId);
+        VideoCollectionDO videoCollection = baseMapper.getVideoCollectionByVideoIdAndUserId(videoId, userId);
+        boolean like = videoCollection != null;
         Map<String, Object> result = new HashMap<>();
         result.put("count", count);
         result.put("like", like);

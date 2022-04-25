@@ -3,6 +3,7 @@ package com.ataraxia.controller;
 import com.ataraxia.controller.support.UserSupport;
 import com.ataraxia.domain.PageResult;
 import com.ataraxia.domain.ResponseResult;
+import com.ataraxia.domain.VideoCollectionDO;
 import com.ataraxia.domain.VideoDO;
 import com.ataraxia.service.VideoService;
 import io.swagger.annotations.Api;
@@ -94,6 +95,33 @@ public class VideoController {
         } catch (Exception ignored){}
 
         Map<String, Object> result = videoService.getVideoLikes(videoId, userId);
+        return new ResponseResult<>(result);
+    }
+
+    @PostMapping("/video-collections")
+    @ApiOperation(value = "收藏视频")
+    public ResponseResult<String> saveVideoCollection(@RequestBody VideoCollectionDO videoCollection) {
+        Long userId = userSupport.getCurrentUserId();
+        videoService.saveVideoCollection(videoCollection, userId);
+        return ResponseResult.success();
+    }
+
+    @DeleteMapping("/video-collections")
+    @ApiOperation(value = "取消收藏视频")
+    public ResponseResult<String> deleteVideoCollection(@RequestParam Long videoId) {
+        Long userId = userSupport.getCurrentUserId();
+        videoService.deleteVideoCollection(videoId, userId);
+        return ResponseResult.success();
+    }
+
+    @GetMapping("/video-collections")
+    @ApiOperation(value = "查询视频收藏数量")
+    public ResponseResult<Map<String, Object>> getVideoCollections(@RequestParam Long videoId) {
+        Long userId = null;
+        try {
+            userId = userSupport.getCurrentUserId();
+        } catch (Exception ignored) {}
+        Map<String, Object> result = videoService.getVideoCollections(videoId, userId);
         return new ResponseResult<>(result);
     }
 

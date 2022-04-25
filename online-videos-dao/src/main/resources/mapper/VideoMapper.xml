@@ -25,4 +25,33 @@
             (#{videoTag.videoId}, #{videoTag.tagId}, #{videoTag.createTime})
         </foreach>
     </insert>
+
+    <insert id="saveVideoCollection">
+        insert into t_video_collection (video_id, user_id, group_id, create_time)
+        VALUES (#{videoCollection.videoId},
+                #{videoCollection.userId},
+                #{videoCollection.groupId},
+                #{videoCollection.createTime})
+    </insert>
+
+    <delete id="deleteVideoCollection">
+        delete
+        from t_video_collection
+        where video_id = #{videoId}
+          and user_id = #{userId}
+    </delete>
+
+    <select id="getVideoCollections" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select count(1)
+        from t_video_collection
+        where video_id = #{videoId}
+    </select>
+
+    <select id="getVideoCollectionByVideoIdAndUserId" resultType="com.ataraxia.domain.VideoCollectionDO">
+        select *
+        from t_video_collection
+        where video_id = #{videoId}
+          and user_id = #{userId}
+    </select>
+
 </mapper>
