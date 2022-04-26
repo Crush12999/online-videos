@@ -4,6 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.Date;
 
@@ -13,14 +17,17 @@ import java.util.Date;
  * @description 用户基本信息表
  */
 
+@Document(indexName = "user-infos")
 @TableName("t_user_info")
 public class UserInfoDO {
 
+    @Id
     @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long userId;
 
+    @Field(type = FieldType.Text)
     private String nick;
 
     private String avatar;
@@ -31,8 +38,10 @@ public class UserInfoDO {
 
     private String birth;
 
+    @Field(type = FieldType.Date)
     private Date createTime;
 
+    @Field(type = FieldType.Date)
     private Date updateTime;
 
     /**

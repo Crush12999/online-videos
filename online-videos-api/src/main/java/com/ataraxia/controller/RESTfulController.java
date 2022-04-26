@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -83,5 +84,13 @@ public class RESTfulController {
     public ResponseResult<VideoDO> getEsVideos(@RequestParam String keyword) {
         VideoDO video = elasticSearchService.getVideos(keyword);
         return new ResponseResult<>(video);
+    }
+
+    @GetMapping("/contents")
+    public ResponseResult<List<Map<String, Object>>> listContents(@RequestParam String keyword,
+                                                                  @RequestParam Integer pageNo,
+                                                                  @RequestParam Integer pageSize) throws Exception {
+        List<Map<String, Object>> list = elasticSearchService.listContents(keyword, pageNo, pageSize);
+        return new ResponseResult<>(list);
     }
 }
