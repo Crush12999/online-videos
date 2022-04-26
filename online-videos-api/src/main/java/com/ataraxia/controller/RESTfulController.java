@@ -1,5 +1,8 @@
 package com.ataraxia.controller;
 
+import com.ataraxia.domain.ResponseResult;
+import com.ataraxia.domain.VideoDO;
+import com.ataraxia.service.ElasticSearchService;
 import com.ataraxia.util.FastDFSUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +23,9 @@ public class RESTfulController {
 
     @Autowired
     private FastDFSUtil fastDFSUtil;
+
+    @Autowired
+    private ElasticSearchService elasticSearchService;
 
     private final Map<Integer, Map<String, Object>> dataMap;
 
@@ -71,5 +77,11 @@ public class RESTfulController {
     @GetMapping("/slices")
     public void slices(MultipartFile file) {
         fastDFSUtil.convertFileToSlices(file);
+    }
+
+    @GetMapping("/es-videos")
+    public ResponseResult<VideoDO> getEsVideos(@RequestParam String keyword) {
+        VideoDO video = elasticSearchService.getVideos(keyword);
+        return new ResponseResult<>(video);
     }
 }

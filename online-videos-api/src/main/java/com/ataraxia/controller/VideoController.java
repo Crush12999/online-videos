@@ -2,6 +2,7 @@ package com.ataraxia.controller;
 
 import com.ataraxia.controller.support.UserSupport;
 import com.ataraxia.domain.*;
+import com.ataraxia.service.ElasticSearchService;
 import com.ataraxia.service.VideoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,12 +28,17 @@ public class VideoController {
     @Autowired
     private VideoService videoService;
 
+    @Autowired
+    private ElasticSearchService elasticSearchService;
+
     @PostMapping("/videos")
     @ApiOperation(value = "视频投稿")
     public ResponseResult<String> saveVideo(@RequestBody VideoDO video) {
         Long userId = userSupport.getCurrentUserId();
         video.setUserId(userId);
         videoService.saveVideo(video);
+        // 在es中添加数据
+        elasticSearchService.saveVideo(video);
         return ResponseResult.success();
     }
 

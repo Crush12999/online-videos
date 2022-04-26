@@ -4,6 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -14,17 +18,20 @@ import java.util.List;
  * @author chuchen
  * @TableName t_video
  */
+@Document(indexName = "videos")
 @TableName(value ="t_video")
 public class VideoDO implements Serializable {
     /**
      * 主键id
      */
+    @Id
     @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
      * 用户id
      */
+    @Field(type = FieldType.Long)
     private Long userId;
 
     /**
@@ -40,6 +47,7 @@ public class VideoDO implements Serializable {
     /**
      * 视频标题
      */
+    @Field(type = FieldType.Text)
     private String title;
 
     /**
@@ -60,16 +68,19 @@ public class VideoDO implements Serializable {
     /**
      * 视频简介
      */
+    @Field(type = FieldType.Text)
     private String description;
 
     /**
      * 创建时间
      */
+    @Field(type = FieldType.Date)
     private Date createTime;
 
     /**
      * 更新时间
      */
+    @Field(type = FieldType.Date)
     private Date updateTime;
 
     /**
